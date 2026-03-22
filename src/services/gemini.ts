@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Subject, Task, Question, UserProfile, ChatMessage } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
 export const geminiService = {
   async generateDailyPlan(subjectPriorities: Subject[], weakTopics: string[], profile: UserProfile, avgAccuracy: number = 70): Promise<Task[]> {
