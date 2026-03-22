@@ -1,0 +1,7 @@
+{
+  "name": "Wallington Ace: Academic Accelerator",
+  "description": "An AI-powered learning platform for Year 9 students focusing on Maths, Physics, and Chemistry with adaptive daily plans and gamified progress tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

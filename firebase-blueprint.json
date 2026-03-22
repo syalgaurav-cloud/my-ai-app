@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Student profile with gamification stats and parent info.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["student", "parent"] },
+        "parentEmail": { "type": "string", "format": "email" },
+        "xp": { "type": "integer" },
+        "level": { "type": "integer" },
+        "streak": { "type": "integer" },
+        "lastActiveDate": { "type": "string", "format": "date-time" },
+        "weakTopics": { "type": "array", "items": { "type": "string" } },
+        "strongTopics": { "type": "array", "items": { "type": "string" } },
+        "children": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["uid", "email", "role", "xp", "level", "streak"]
+    },
+    "StudyPlan": {
+      "title": "Daily Study Plan",
+      "description": "Personalized daily tasks for the student.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string", "enum": ["Maths", "Physics", "Chemistry"] },
+              "topic": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "completed"] },
+              "content": { "type": "string" },
+              "questions": { "type": "array" }
+            }
+          }
+        },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["uid", "date", "tasks", "completed"]
+    },
+    "Assessment": {
+      "title": "Daily Assessment Result",
+      "description": "Results of the end-of-day adaptive test.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "integer" },
+        "accuracy": { "type": "number" },
+        "strengths": { "type": "array", "items": { "type": "string" } },
+        "weaknesses": { "type": "array", "items": { "type": "string" } },
+        "improvementTrend": { "type": "string" }
+      },
+      "required": ["uid", "date", "score", "accuracy"]
+    },
+    "ParentReport": {
+      "title": "Parent Daily Report",
+      "description": "Summary report generated for parents.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "sent": { "type": "boolean" },
+        "content": { "type": "string" }
+      },
+      "required": ["uid", "date", "sent"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profile document."
+    },
+    "/studyPlans/{planId}": {
+      "schema": "StudyPlan",
+      "description": "Daily study plans for students."
+    },
+    "/assessments/{assessmentId}": {
+      "schema": "Assessment",
+      "description": "Daily assessment results."
+    },
+    "/parentReports/{reportId}": {
+      "schema": "ParentReport",
+      "description": "Daily reports for parents."
+    }
+  }
+}

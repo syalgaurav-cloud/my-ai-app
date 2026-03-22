@@ -1,0 +1,133 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - displayName: string (optional)
+    //   - email: string (required, email format)
+    //   - parentEmail: string (optional, email format)
+    //   - xp: number (required, >= 0)
+    //   - level: number (required, >= 1)
+    //   - streak: number (required, >= 0)
+    //   - lastActiveDate: string (optional, ISO 8601)
+    //   - weakTopics: list (optional, strings)
+    //   - strongTopics: list (optional, strings)
+    //
+    // Collection: studyPlans
+    // Document ID: {planId}
+    // Fields:
+    //   - uid: string (required)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - tasks: list (required, objects)
+    //   - completed: bool (required)
+    //
+    // Collection: assessments
+    // Document ID: {assessmentId}
+    // Fields:
+    //   - uid: string (required)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - score: number (required)
+    //   - totalQuestions: number (required)
+    //   - accuracy: number (required)
+    //   - strengths: list (optional, strings)
+    //   - weaknesses: list (optional, strings)
+    //
+    // Collection: parentReports
+    // Document ID: {reportId}
+    // Fields:
+    //   - uid: string (required)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - sent: bool (required)
+    //   - content: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDate(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'xp', 'level', 'streak']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.xp is number && data.xp >= 0 &&
+             data.level is number && data.level >= 1 &&
+             data.streak is number && data.streak >= 0;
+    }
+
+    function isValidStudyPlan(data) {
+      return data.keys().hasAll(['uid', 'date', 'tasks', 'completed']) &&
+             data.uid == request.auth.uid &&
+             isValidDate(data.date) &&
+             data.tasks is list &&
+             data.completed is bool;
+    }
+
+    function isValidAssessment(data) {
+      return data.keys().hasAll(['uid', 'date', 'score', 'accuracy']) &&
+             data.uid == request.auth.uid &&
+             isValidDate(data.date) &&
+             data.score is number &&
+             data.accuracy is number;
+    }
+
+    function isValidParentReport(data) {
+      return data.keys().hasAll(['uid', 'date', 'sent', 'content']) &&
+             data.uid == request.auth.uid &&
+             isValidDate(data.date) &&
+             data.sent is bool &&
+             data.content is string;
+    }
+
+    // ===============================================================
+    // Rules (Relaxed for Custom Login Demo)
+    // ===============================================================
+
+    match /users/{userId} {
+      // Allow public read/write for the custom login and password change demo
+      // In a production app, you would use Firebase Auth and restrict this to isOwner(userId)
+      allow read, write: if true;
+    }
+
+    match /studyPlans/{planId} {
+      allow read, write: if true;
+    }
+
+    match /assessments/{assessmentId} {
+      allow read, write: if true;
+    }
+
+    match /parentReports/{reportId} {
+      allow read, write: if true;
+    }
+  }
+}
